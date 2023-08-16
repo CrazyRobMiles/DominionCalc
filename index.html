@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>DominionCalc</title>
+</head>
+
+<body>
+    <div class="container mb-2 mt-2">
+        <h1 class="menuHeading">&#128421;&#65039; DominionCalc</h1>
+        <p>
+            <textarea class="w-100" rows="20" cols="120" id="gameLog" "></textarea>
+    </p>
+    <p class=" w-100">Paste the Dominion log into the window above and click Calculate to work out the player scores</p>
+    <p>
+        <button class="btn btn-primary mb-4 btn-block" onclick="doCalculate();">Calculate</button>
+    </p>
+    <p>
+        <textarea class="w-100" rows="20" cols="120" id="playerTotals"></textarea>
+        </p>
+    </div>
+    <script>
+
+        function doCalculate() {
+            var players = {};
+
+            const victoryCards = [
+                { names: ["Curse", "Curses"], value: -1 },
+                { names: ["Estate", "Estates"], value: 1 },
+                { names: ["Duchy", "Duchies"], value: 3 },
+                { names: ["Province", "Provinces"], value: 6 }
+            ];
+
+            var gameLog = document.getElementById("gameLog");
+
+            var lines = gameLog.value.split("\n");
+
+            lines.forEach(line => {
+                if (line.includes(" gains ")) {
+                    var words = line.split(" ");
+                    var name = words[0];
+
+                    if (!(name in players)) {
+                        // create a player object
+                        players[name] = { score: 0, victoryCards: [] };
+                    }
+
+                    var player = players[name];
+
+                    var count = 0;
+                    if (line.includes("gains a ")) count = 1;
+                    if (line.includes("gains 2 ")) count = 2;
+                    if (line.includes("gains 3 ")) count = 3;
+
+                    victoryCards.forEach(card => {
+                        for (let i = 0; i < card.names.length; i++) {
+                            if (line.includes(card.names[i])) {
+                                player.score += (card.value * count);
+                                player.victoryCards.push(line);
+                                break;
+                            }
+                        }
+                    })
+                }
+            });
+
+            var playerTotals = document.getElementById("playerTotals");
+
+            playerTotals.value = "";
+
+            for (player in players) {
+                if (players.hasOwnProperty(player)) {
+                    p = players[player];
+                    playerTotals.value += `${player}  ${p.score}\n`;
+                    p.victoryCards.forEach(card => {
+                        playerTotals.value += `   ${card}\n`;
+                    })
+
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>
