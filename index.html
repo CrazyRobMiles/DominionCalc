@@ -12,7 +12,7 @@
 
 <body>
     <div class="container mb-2 mt-2">
-        <h1 class="menuHeading">&#128421;&#65039; DominionCalc</h1>
+        <h1>&#128421;&#65039; DominionCalc</h1>
         <p>
             <textarea class="w-100" rows="20" cols="120" id="gameLog" "></textarea>
     </p>
@@ -33,29 +33,48 @@
                 { names: ["Curse", "Curses"], value: -1 },
                 { names: ["Estate", "Estates"], value: 1 },
                 { names: ["Duchy", "Duchies"], value: 3 },
-                { names: ["Province", "Provinces"], value: 6 }
+                { names: ["Province", "Provinces"], value: 6 },
+                { names: ["Colony", "Colonies"], value: 10 },
+                { names: ["VP"], value: 1 },
+
             ];
 
             var gameLog = document.getElementById("gameLog");
 
             var lines = gameLog.value.split("\n");
 
+            var playerName = "";
+
             lines.forEach(line => {
-                if (line.includes(" gains ")) {
-                    var words = line.split(" ");
+                var words = line.split(" ");
+                if(words[0]=="Turn"){
+                    playerName = words[3];
+                }
+                if (line.includes(" gains ") || line.includes( " trashes ") || line.includes (" gets ")) {
                     var name = words[0];
 
                     if (!(name in players)) {
                         // create a player object
-                        players[name] = { score: 0, victoryCards: [] };
+                        players[name] = { fullname: playerName, score: 0, victoryCards: [] };
                     }
 
                     var player = players[name];
 
                     var count = 0;
+
                     if (line.includes("gains a ")) count = 1;
                     if (line.includes("gains 2 ")) count = 2;
                     if (line.includes("gains 3 ")) count = 3;
+
+                    if (line.includes("trashes a ")) count = -1;
+                    if (line.includes("trashes an ")) count = -1;
+                    if (line.includes("trashes 2 ")) count = -2;
+                    if (line.includes("trashes 3 ")) count = -3;
+
+                    if (line.includes("gets 1 ")) count = 1;
+                    if (line.includes("gets 2 ")) count = 2;
+                    if (line.includes("gets 3 ")) count = 3;
+
 
                     victoryCards.forEach(card => {
                         for (let i = 0; i < card.names.length; i++) {
@@ -76,11 +95,18 @@
             for (player in players) {
                 if (players.hasOwnProperty(player)) {
                     p = players[player];
-                    playerTotals.value += `${player}  ${p.score}\n`;
+                    playerTotals.value += `${p.fullname}  ${p.score}\n`;
                     p.victoryCards.forEach(card => {
                         playerTotals.value += `   ${card}\n`;
                     })
 
+                }
+            }
+            playerTotals.value += `Summary:\n`
+            for (player in players) {
+                if (players.hasOwnProperty(player)) {
+                    p = players[player];
+                    playerTotals.value += `  ${p.fullname}  ${p.score}\n`;
                 }
             }
         }
